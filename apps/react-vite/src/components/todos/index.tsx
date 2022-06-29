@@ -1,12 +1,13 @@
-import { AddTodo } from './AddTodo'
-import { TodosFooter } from './TodosFooter'
-import { TodosList } from './TodosList'
+import { Header } from './Header'
+import { List } from './List'
+import { Footer } from './Footer'
+
 export const Todos = () => {
   return (
-    <div className="mt-8 shadow-xl w-full bg-white">
-      <AddTodo />
-      <TodosList />
-      <TodosFooter />
+    <div>
+      <Header />
+      <List />
+      <Footer />
     </div>
   )
 }

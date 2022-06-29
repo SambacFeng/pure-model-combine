@@ -1,13 +1,13 @@
 import { produce, Draft } from 'immer'
-import { setupPreloadCallback, setupStartCallback, setupStore } from '@pure-model/core'
+import { setupStore } from '@pure-model/core'
 
-export type Todo = {
-    id: number;
-    content: string;
-    completed: boolean;
-};
+export interface Todo {
+  id: number,
+  text: string,
+  done: boolean,
+}
 
-export type Todos = Todo[];
+export type Todos = Todo[]
 
 const initialState: Todos = []
 
@@ -16,54 +16,42 @@ export default function TodosInitializer () {
     name: 'todos',
     initialState,
     reducers: {
-      addTodo: produce((draft: Draft<Todos>, content: string) => {
+      addTodo: produce((draft: Draft<Todos>, text: string) => {
         draft.push({
           id: Date.now(),
-          content,
-          completed: false
+          text,
+          done: false
         })
       }),
-      updateTodo: produce((draft: Draft<Todos>, { id, content }: { id: number, content: string }) => {
-        draft.map((todo: Todo) => {
-          if (todo.id !== id) return todo
-          todo.content = content
-          return todo
-        }).slice()
+      deleteTodo: produce((draft: Draft<Todos>, id: number) => {
+        return draft.filter(todo => todo.id !== id)
       }),
-      toggleTodo: produce((draft: Draft<Todos>, id: number) => {
-        draft.map((todo: Todo) => {
-          if (todo.id !== id) return todo
-          todo.completed = !todo.completed
+      checkTodo: produce((draft: Draft<Todos>, id: number) => {
+        draft.map(todo => {
+          if (todo.id === id) {
+            todo.done = !todo.done
+          }
           return todo
         })
       }),
-      toggleAll: (state: Todos) => produce(state, (draft: Draft<Todos>) => {
-        const allCompleted = draft.every(todo => todo.completed)
-        if (allCompleted) {
-          draft.map((todo: Todo) => {
-            todo.completed = false
-            return todo
-          })
-        } else {
-          draft.map((todo: Todo) => {
-            todo.completed = true
-            return todo
-          })
-        }
+      clearDone: (state: Todos) => produce(state, (draft: Draft<Todos>) => {
+        return draft.filter(todo => !todo.done)
       }),
-      removeTodo: produce((draft: Draft<Todos>, id: number) => {
-        return draft.filter((todo: Todo) => todo.id !== id)
+      checkAll: (state: Todos) => produce(state, (draft: Draft<Todos>) => {
+        return draft.map(todo => {
+          todo.done = true
+          return todo
+        })
       }),
-      clearCompleted: (state: Todos) => produce(state, (draft: Draft<Todos>) => {
-        return draft.filter((todo: Todo) => !todo.completed)
+      updateTodo: produce((draft: Draft<Todos>, { id, text }: { id: number, text: string }) => {
+        draft.map(todo => {
+          if (todo.id !== id) return todo
+          todo.text = text
+          return todo
+        })
       })
     }
   })
-  setupPreloadCallback(() => {
-    console.log('preload preload')
-  })
-  setupStartCallback(() => {
-    console.log('setup called', store.getState())
-  })
+
   return { store, actions }
 }
