@@ -1,6 +1,7 @@
 import { createCombine } from '@pure-model-combine/core'
 import HeaderInitializer from './header'
 import TodosInitializer from './todos'
+import EditInitializer from './edit'
 
 export const globalModels = [TodosInitializer]
 
@@ -47,11 +48,18 @@ type TodoProps = {
   id: number
 }
 export const todoCombine = createCombine({
-  todos: TodosInitializer
+  todos: TodosInitializer,
+  edit: EditInitializer
 }, (props: TodoProps, models, getState) => {
+  type State = ReturnType<typeof getState>
+  const todo = ({ todos }: State) => todos.filter(todo => todo.id === props.id)[0]
+  const isEditing = (state: State) => state.edit.isEditing
   return {
     selectors: {
-      todo: (state) => state.todos.filter(todo => todo.id === props.id)[0]
+      todo,
+      isEditing,
+      // isEditing(state) 怎么理解
+      newText: (state) => isEditing(state) ? state.edit.text : todo(state).text || ''
     },
     actions: {
       handleCheckChange: (id: number) => {
@@ -59,6 +67,24 @@ export const todoCombine = createCombine({
       },
       handleDelete: (id: number) => {
         return models.todos.actions.deleteTodo(id)
+      },
+      handleEditing: () => {
+        // console.log('handleEditing')
+        models.edit.actions.startEditing()
+        models.edit.actions.update(todo(getState())?.text || '')
+      },
+      finishEditing: () => {
+        const newText = models.edit.store.getState().text
+        // console.log('finishEditing newtext', newText)
+        if (newText.trim().length) {
+          models.todos.actions.updateTodo({ id: props.id, text: newText })
+        } else {
+          models.todos.actions.deleteTodo(props.id)
+        }
+        models.edit.actions.endEditing()
+      },
+      updateText: (text: string) => {
+        models.edit.actions.update(text)
       }
     }
   }

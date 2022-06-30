@@ -3,7 +3,7 @@ import { TodoItem } from './TodoItem'
 
 export const List = ListContainer.toWrappedComponent(({ actions, selected }) => {
   const { todoList } = selected
-  console.log('todoList', todoList)
+  // console.log('todoList', todoList)
 
   return (
     <ul>

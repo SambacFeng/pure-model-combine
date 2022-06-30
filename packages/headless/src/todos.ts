@@ -17,7 +17,7 @@ export default function TodosInitializer () {
     initialState,
     reducers: {
       addTodo: produce((draft: Draft<Todos>, text: string) => {
-        draft.push({
+        draft.unshift({
           id: Date.now(),
           text,
           done: false
