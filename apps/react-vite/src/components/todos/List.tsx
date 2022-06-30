@@ -1,3 +1,4 @@
+import { Key } from 'react'
 import { ListContainer } from '../../adapt-headless'
 import { TodoItem } from './TodoItem'
 
@@ -7,7 +8,7 @@ export const List = ListContainer.toWrappedComponent(({ actions, selected }) => 
 
   return (
     <ul>
-      {todoList.map(todo => <TodoItem key={todo.id} id={todo.id} />)}
+      {todoList.map((todo: { id: number }) => <TodoItem key={todo.id} id={todo.id} />)}
     </ul >
   )
 })
