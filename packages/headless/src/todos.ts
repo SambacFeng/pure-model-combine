@@ -38,7 +38,7 @@ export default function TodosInitializer () {
         return draft.filter(todo => !todo.done)
       }),
       checkAll: (state: Todos) => produce(state, (draft: Draft<Todos>) => {
-        return draft.map(todo => {
+        draft.map(todo => {
           todo.done = true
           return todo
         })
