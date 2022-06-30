@@ -9,9 +9,10 @@ export interface Todo {
 
 export type Todos = Todo[]
 
-const initialState: Todos = []
-
 export default function TodosInitializer () {
+  const localData = localStorage.getItem('pure-model-combine-todo')
+  console.log('localData', localData)
+  const initialState = (localData && JSON.parse(localData)) || []
   const { store, actions } = setupStore({
     name: 'todos',
     initialState,

@@ -1,7 +1,8 @@
-import { createCombine } from '@pure-model-combine/core'
+import { createCombine, subscribeModels } from '@pure-model-combine/core'
 import HeaderInitializer from './header'
 import TodosInitializer from './todos'
 import EditInitializer from './edit'
+import { setupPreloadCallback } from '@pure-model/core'
 
 export const globalModels = [TodosInitializer]
 
@@ -36,12 +37,18 @@ export const headerCombine = createCombine({
 export const listCombine = createCombine({
   // 如果只有一个initializer，可不可以不combine，要怎么做
   todos: TodosInitializer
-}, () => ({
-  selectors: {
-    todoList: (state) => state.todos
-  },
-  actions: {}
-}))
+}, (props, models, getState) => {
+  subscribeModels(models, state => {
+    console.log('sub', state.todos)
+    localStorage.setItem('pure-model-combine-todo', JSON.stringify(state.todos))
+  })
+  return {
+    selectors: {
+      todoList: (state) => state.todos
+    },
+    actions: {}
+  }
+})
 
 // 不加这个会报CE，为什么
 type TodoProps = {
@@ -52,13 +59,12 @@ export const todoCombine = createCombine({
   edit: EditInitializer
 }, (props: TodoProps, models, getState) => {
   type State = ReturnType<typeof getState>
-  const todo = ({ todos }: State) => todos.filter(todo => todo.id === props.id)[0]
+  const todo = ({ todos }: State) => todos.filter((todo: { id: number }) => todo.id === props.id)[0]
   const isEditing = (state: State) => state.edit.isEditing
   return {
     selectors: {
       todo,
       isEditing,
-      // isEditing(state) 怎么理解
       newText: (state) => isEditing(state) ? state.edit.text : todo(state).text || ''
     },
     actions: {
@@ -99,6 +105,7 @@ export const footerCombine = createCombine({
     },
     actions: {
       handleCheckAll: () => {
+        console.log('handlecheckall')
         return models.todos.actions.checkAll()
       },
       handleClear: () => {
@@ -107,3 +114,12 @@ export const footerCombine = createCombine({
     }
   }
 })
+
+/* setupPreloadCallback(() => {
+  const localData = localStorage.getItem('pure-model-combine-todo')
+  const todos = (localData && JSON.parse(localData)) || []
+})
+
+subscribe(todoCombine, state => {
+  localStorage.setItem('pure-model-combine-todo', JSON.stringify({}))
+}) */
